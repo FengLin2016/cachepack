@@ -1,0 +1,11 @@
+{
+  "name": "cachepack",
+  "version": "0.0.2",
+  "description": "webpack生成只修改文件",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
