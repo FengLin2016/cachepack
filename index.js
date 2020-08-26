@@ -24,9 +24,9 @@ cachePack.prototype.apply = function(compiler) {
     // 模块中的静态资源过滤
     compilation.hooks.moduleAsset.tap("cachePack", (module, filename) => {
       let arr = []
-      if(!/^_./.test(filename) && that.cacheData){
+      if(!/^_./.test(filename)){
         that.filelist += ('"'+module.renderedHash+'":'+ true +',\n');
-        if(that.cacheData[module.renderedHash]){
+        if(that.cacheData && that.cacheData[module.renderedHash]){
           delete compilation.assets[filename]
         }
       }
@@ -35,9 +35,9 @@ cachePack.prototype.apply = function(compiler) {
     compilation.hooks.chunkAsset.tap("cachePack", (chunk, filename) => {
       let contentHash = chunk.contentHash.javascript
       let arr = []
-      if(!/^_./.test(filename) && that.cacheData){
+      if(!/^_./.test(filename) ){
         that.filelist += ('"'+contentHash+'":'+ true +',\n');
-        if(that.cacheData[contentHash]){
+        if(that.cacheData && that.cacheData[contentHash]){
           // 主要避免后期优化资源造成的时间（主要节省时间点）
           chunk.files = []
           delete compilation.assets[filename]
