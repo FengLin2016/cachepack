@@ -24,6 +24,6 @@ $ npm run build
 
 ```
 ###### tips: 
-1、如果想重新生成所有，删除/node_modules/.cahche/cache-webpack-plugin
+1、如果想重新生成所有，删除/node_modules/.cahche/cache-webpack-plugin  
 2、可结合cache-loader配合使用节省打包时间，但是cache-loader和提取css插件有问题（[issues](https://github.com/webpack-contrib/cache-loader/issues/40)）
 [xiayulin](https://www.xiayulin.top)
