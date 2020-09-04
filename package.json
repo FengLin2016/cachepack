@@ -1,6 +1,6 @@
 {
   "name": "cache-webpack-plugin",
-  "version": "1.0.4",
+  "version": "0.0.1",
   "description": "webpack生成只修改文件",
   "main": "index.js",
   "scripts": {
