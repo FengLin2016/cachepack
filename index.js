@@ -1,57 +1,69 @@
 const fs = require('fs')
+const path = require('path')
+var mkdirp = require('mkdirp')
+const dirname = path.dirname(__dirname);
 
-function cachePack(options = {
-  subDir:''
+function cacheWebpackPlugin(options = {
+  filename:'.cache'
 }) {
   // 使用 options 设置插件实例……
-  this.subDir = options.subDir
+  this.cachefilename = options.filename
   this.cacheData = ''
   this.filelist = '{\n'
+  this.delList = [] // 待删除文件
 }
 
 
-cachePack.prototype.apply = function(compiler) {
+cacheWebpackPlugin.prototype.apply = function(compiler) {
   let that = this
   
   // 读取缓存文件
-  if(fs.existsSync('./'+that.subDir+'cache.js')){
-    var data = fs.readFileSync('./'+that.subDir+'cache.js');
+  if(fs.existsSync(dirname + '/.cache/cache-webpack-plugin/'+that.cachefilename)){
+    var data = fs.readFileSync(dirname + '/.cache/cache-webpack-plugin/'+that.cachefilename);
     that.cacheData = eval('('+data.toString()+')')
   }
 
-  compiler.hooks.compilation.tap("cachePack", compilation => {
+  compiler.hooks.compilation.tap("cacheWebpackPlugin", compilation => {
     
     // 模块中的静态资源过滤
-    compilation.hooks.moduleAsset.tap("cachePack", (module, filename) => {
-      let arr = []
+    compilation.hooks.moduleAsset.tap("cacheWebpackPlugin", (module, filename) => {
       if(!/^_./.test(filename)){
         that.filelist += ('"'+module.renderedHash+'":'+ true +',\n');
         if(that.cacheData && that.cacheData[module.renderedHash]){
-          delete compilation.assets[filename]
+          // delete compilation.assets[filename]
+          that.delList.push(filename)
         }
       }
     })
     // chunk中的静态资源过滤
-    compilation.hooks.chunkAsset.tap("cachePack", (chunk, filename) => {
+    compilation.hooks.chunkAsset.tap("cacheWebpackPlugin", (chunk, filename) => {
       let contentHash = chunk.contentHash.javascript
-      let arr = []
       if(!/^_./.test(filename) ){
         that.filelist += ('"'+contentHash+'":'+ true +',\n');
         if(that.cacheData && that.cacheData[contentHash]){
-          // 主要避免后期优化资源造成的时间（主要节省时间点）
-          chunk.files = []
-          delete compilation.assets[filename]
+          that.delList.push(filename)
         }
       }
     })
   });
   
-  compiler.hooks.emit.tapAsync('cachePack', function(compilation, callback) {
+  compiler.hooks.emit.tapAsync('cacheWebpackPlugin', function(compilation, callback) {
+
+    // 删除文件
+    that.delList.map(item => {
+      delete compilation.assets[item]
+    })
     // 写入缓存文件
     that.filelist += '}';
-    fs.writeFileSync('./'+that.subDir+'cache.js', that.filelist)
-    callback();
+    mkdirp(dirname + '/.cache/cache-webpack-plugin/', mkdirErr => {
+      if (mkdirErr) {
+        throw new Error(mkdirErr)
+        return;
+      }
+      fs.writeFileSync(dirname + '/.cache/cache-webpack-plugin/'+that.cachefilename, that.filelist)
+      callback();
+    });
   });
 };
 
-module.exports = cachePack;
+module.exports = cacheWebpackPlugin;
