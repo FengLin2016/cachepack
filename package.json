@@ -15,5 +15,6 @@
   ],
   "dependencies": {
     "mkdirp": "^1.0.4"
-  }
+  },
+  "repository": "https://github.com/FengLin2016/cachepack"
 }
