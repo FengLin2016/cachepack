@@ -3,6 +3,7 @@ const path = require('path')
 var mkdirp = require('mkdirp')
 const dirname = path.dirname(__dirname);
 
+
 function cacheWebpackPlugin(options = {
   filename:'.cache'
 }) {
@@ -13,6 +14,7 @@ function cacheWebpackPlugin(options = {
   this.delList = [] // 待删除文件
 }
 
+console.log('dirname',dirname)
 
 cacheWebpackPlugin.prototype.apply = function(compiler) {
   let that = this
@@ -55,14 +57,14 @@ cacheWebpackPlugin.prototype.apply = function(compiler) {
     })
     // 写入缓存文件
     that.filelist += '}';
-    mkdirp(dirname + '/.cache/cache-webpack-plugin/', mkdirErr => {
+    mkdirp(dirname + '/.cache/cache-webpack-plugin/').then(mkdirErr =>{
       if (mkdirErr) {
         throw new Error(mkdirErr)
         return;
       }
       fs.writeFileSync(dirname + '/.cache/cache-webpack-plugin/'+that.cachefilename, that.filelist)
       callback();
-    });
+    })
   });
 };
 
