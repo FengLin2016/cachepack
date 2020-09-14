@@ -3,25 +3,32 @@ const path = require('path')
 var mkdirp = require('mkdirp')
 const dirname = path.dirname(__dirname);
 
+const dir = dirname + '/../.cache/cache-webpack-plugin/'
 
 function cacheWebpackPlugin(options = {
-  filename:'.cache'
+  filename:'.cache',
+  all: false
 }) {
   // 使用 options 设置插件实例……
   this.cachefilename = options.filename
   this.cacheData = ''
   this.filelist = '{\n'
   this.delList = [] // 待删除文件
+
+  // 是否生成所有, 是就先删除缓存文件
+  if(options.all){
+    fs.unlinkSync(dir+this.cachefilename)
+  }
 }
 
-console.log('dirname',dirname)
+
 
 cacheWebpackPlugin.prototype.apply = function(compiler) {
   let that = this
   
   // 读取缓存文件
-  if(fs.existsSync(dirname + '/.cache/cache-webpack-plugin/'+that.cachefilename)){
-    var data = fs.readFileSync(dirname + '/.cache/cache-webpack-plugin/'+that.cachefilename);
+  if(fs.existsSync(dir+that.cachefilename)){
+    var data = fs.readFileSync(dir+that.cachefilename);
     that.cacheData = eval('('+data.toString()+')')
   }
 
@@ -57,12 +64,12 @@ cacheWebpackPlugin.prototype.apply = function(compiler) {
     })
     // 写入缓存文件
     that.filelist += '}';
-    mkdirp(dirname + '/.cache/cache-webpack-plugin/').then(mkdirErr =>{
+    mkdirp(dirname + '/../.cache/cache-webpack-plugin/').then(mkdirErr =>{
       if (mkdirErr) {
         throw new Error(mkdirErr)
         return;
       }
-      fs.writeFileSync(dirname + '/.cache/cache-webpack-plugin/'+that.cachefilename, that.filelist)
+      fs.writeFileSync(dir+that.cachefilename, that.filelist)
       callback();
     })
   });
